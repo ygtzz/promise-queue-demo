@@ -6,11 +6,11 @@ function Queue(concurrency,allowFail){
     this.queue = [];
 }
 
-Queue.prototype.push = function(promise){
-    this.queue.push(promise);
+Queue.prototype.push = function(item){
+    this.queue.push(item);
 }
 
-Queue.prototype.start = function(){
+Queue.prototype.start = function(mapToPromise){
     var self = this;
     return new Promise(function(resolve,reject){
         var completed = 0,
@@ -37,7 +37,7 @@ Queue.prototype.start = function(){
                         results[index] = res;
                         replenish();
                     }
-                    cur.call(cur).then(function(res){
+                    mapToPromise(cur).then(function(res){
                         next(res);
                     },function(res){
                         if(allowFail){
@@ -53,34 +53,23 @@ Queue.prototype.start = function(){
 
 var q1 = new Queue(2);
 var aImg = [
-    'http://www.qianbao.com/static/pc/img/logo1.png',
-    'http://www.qianbao.com/static/pc/img/logo1.png',
-    'http://www.qianbao.com/static/pc/img/logo1.png',
-    'http://www.qianbao.com/static/pc/img/logo1.png',
-    'http://www.qianbao.com/static/pc/img/logo1.png',
-    'http://www.qianbao.com/static/pc/img/logo1.png',
-    'http://www.qianbao.com/static/pc/img/logo1.png',
-    'http://www.qianbao.com/static/pc/img/logo1.png',
-    'http://www.qianbao.com/static/pc/img/logo1.png',
-    'http://www.qianbao.com/static/pc/img/logo1.png',
-    'http://www.qianbao.com/static/pc/img/logo1.png',
-    'http://www.qianbao.com/static/pc/img/logo1.png'
+    '/imgs/mm1.jpg',
+    '/imgs/mm2.jpg',
+    '/imgs/mm3.jpg',
+    '/imgs/mm4.jpg',
+    '/imgs/mm5.jpg',
+    '/imgs/mm6.jpg',
+    '/imgs/mm7.jpg',
+    '/imgs/mm8.jpg',
+    '/imgs/mm9.jpg'    
 ];
 aImg.forEach(function(item){
-    // q1.push(function(){
-    //     return new Promise(function(resolve,reject){
-    //         setTimeout(function(){
-    //             console.log('p' + i +' ' + new Date());
-    //             resolve('p' + i);
-    //         },2000);
-    //     });
-    // });
-    q1.push(function(){
-        return loadImageAsync(item);
-    });
+    q1.push(item);
 });
 
-q1.start().then(function(results){
+q1.start(function(item){
+    return loadImageAsync(item);
+}).then(function(results){
     console.log(results)
 }).catch(function(err){
     console.log(err)
